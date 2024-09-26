@@ -224,4 +224,112 @@ MongoDB supports comparison operators like `$lt`, `$lte`, `$gt`, and `$gte` to f
 
 ---
 
-By following these steps and commands, you can easily manage databases, collections, and documents in MongoDB. MongoDB's flexibility and scalability make it a great choice for modern web applications, especially those dealing with large amounts of unstructured data.
+## Insert Operations
+
+In MongoDB, data can be inserted into collections using `insert()`, `insertOne()`, or `insertMany()` methods. Each has a specific use case depending on whether you're inserting one or multiple documents.
+
+### 1. `insert()`
+The `insert()` method is an older way of inserting documents. It can insert a single document but has largely been replaced by `insertOne()` and `insertMany()` for modern use.
+
+- Example:
+    ```bash
+    db.students.insert({ name: "Ajinkya", age: 20 })
+    ```
+  This command inserts one document into the `students` collection.
+
+### 2. `insertOne()`
+The `insertOne()` method is used to insert a single document into a collection.
+
+- Example:
+    ```bash
+    db.students.insertOne({ name: "Sumit", age: 22 })
+    ```
+  This is the preferred method for inserting a single document.
+
+### 3. `insertMany()`
+The `insertMany()` method is used to insert multiple documents into a collection. The documents are passed as an array of objects.
+
+- Example:
+    ```bash
+    db.students.insertMany([
+        { name: "Omkar", age: 25 },
+        { name: "Arun", age: 52 },
+        { name: "Anil", age: 30 }
+    ])
+    ```
+  Here, multiple documents are inserted at once. The syntax `[{},{},{}]` is used to pass an array of documents.
+
+---
+
+## Update Operations
+
+In MongoDB, documents can be updated using `updateOne()` and `updateMany()`. These methods are used to modify existing documents in a collection.
+
+### 1. `updateOne()`
+The `updateOne()` method is used to update a single document that matches the filter criteria. It follows the pattern where the first argument is the filter (criteria to identify the document), and the second argument specifies the changes to be made using `$set`.
+
+- Example:
+    ```bash
+    db.students.updateOne({ name: "Prathamesh" }, { $set: { age: 20 } })
+    ```
+  This will update the `age` field to `20` for the document where `name` is `"Prathamesh"`.
+
+- Syntax:
+    ```bash
+    db.collection.updateOne(filter, { $set: changes })
+    ```
+
+### 2. `updateMany()`
+The `updateMany()` method is used when you need to update multiple documents that match the filter criteria. The syntax is similar to `updateOne()` but affects all documents that meet the criteria.
+
+- Example:
+    ```bash
+    db.students.updateMany({ age: 21 }, { $set: { age: 20 } })
+    ```
+  This will update all documents where `age` is `21`, changing their `age` to `20`.
+
+- Example with a new field:
+    ```bash
+    db.students.updateMany({ age: { $gte: 21 } }, { $set: { isEligible: true } })
+    ```
+  This adds a new field `isEligible: true` to all documents where `age` is greater than or equal to `21`.
+
+---
+
+## Delete Operations
+
+MongoDB provides `deleteOne()` and `deleteMany()` methods to remove documents from a collection. These operations are used to delete one or more documents based on the specified criteria.
+
+### 1. `deleteOne()`
+The `deleteOne()` method is used to delete a single document that matches the filter criteria.
+
+- Example:
+    ```bash
+    db.students.deleteOne({ isEligible: true })
+    ```
+  This will delete the first document that has `isEligible` set to `true`.
+
+### 2. `deleteMany()`
+The `deleteMany()` method is used to delete all documents that match the filter criteria.
+
+- Example:
+    ```bash
+    db.students.deleteMany({ age: 21 })
+    ```
+  This will delete all documents where `age` is `21`.
+
+### Deleting All Documents
+
+You can also delete all documents from a collection by passing an empty filter `{}`:
+
+- To delete one document:
+    ```bash
+    db.students.deleteOne({})
+    ```
+
+- To delete all documents:
+    ```bash
+    db.students.deleteMany({})
+    ```
+
+---
