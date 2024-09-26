@@ -333,3 +333,134 @@ You can also delete all documents from a collection by passing an empty filter `
     ```
 
 ---
+## Projection in MongoDB
+
+Projection in MongoDB is similar to selecting specific columns in SQL. It allows you to retrieve only the fields you need from documents within a collection.
+
+### Example:
+If you want to retrieve only the `name` field from the `students` collection, you can use the following query:
+
+```bash
+db.students.find({}, { name: 1 })
+```
+
+Here, `name: 1` acts like a "true" value, meaning only the `name` field will be displayed. However, by default, the `_id` field is also included in the results:
+
+```bash
+[
+  { _id: ObjectId('66f54345be80faf9a8c73c04'), name: 'Aakash' }
+]
+```
+
+### Excluding the `_id` Field
+If you don’t want the `_id` field to be displayed, you can explicitly exclude it by setting `_id: 0`:
+
+```bash
+db.students.find({}, { name: 1, _id: 0 })
+```
+
+#### Output:
+```bash
+[
+  { name: 'Aakash' }, { name: 'Ananya' },
+  { name: 'Dev' },    { name: 'Riya' },
+  { name: 'Kunal' },  { name: 'Simran' },
+  { name: 'Yash' },   { name: 'Tanya' },
+  { name: 'Harsh' },  { name: 'Priya' },
+  { name: 'Shivam' }, { name: 'Aditi' },
+  { name: 'Manav' },  { name: 'Snehal' },
+  { name: 'Kartik' }, { name: 'Sara' },
+  { name: 'Nikhil' }, { name: 'Shreya' },
+  { name: 'Rahul' },  { name: 'Ishika' }
+]
+```
+
+---
+
+## Schemaless Nature of MongoDB
+
+MongoDB is a schemaless database, meaning it does not enforce a fixed structure for documents within a collection. This provides flexibility to insert documents with different fields.
+
+### Example:
+```bash
+db.students.insertOne({ name: "Prathamesh" })
+db.students.insertOne({ name: "Gauri", pan_Id: "xxxxx854" })
+```
+
+In the above example, `Prathamesh` has only a `name` field, while `Gauri` has both a `name` and `pan_Id` field.
+
+### Flexibility with Caution
+Although MongoDB allows you to add any fields dynamically, this can lead to inconsistencies if not managed carefully. For instance, if you mix data related to different entities (like students and teachers), your data structure could become confusing and harder to retrieve efficiently.
+
+### Example:
+```bash
+db.teachers.insertOne({
+    teacherID: 101,
+    name: "Ramesh",
+    salary: "8 LPA"
+})
+```
+
+To avoid issues, it's a good practice to define a schema or structure at the application level, ensuring consistency for easier data retrieval and management.
+
+---
+
+## Data Types in MongoDB
+
+MongoDB supports various data types, which allow flexibility in how you store data.
+
+### Common Data Types:
+1. **String** (`text`)
+2. **Boolean** (`true` or `false`)
+3. **Number** (`integer` or `float`)
+4. **ObjectId** (unique ID assigned by MongoDB)
+5. **ISODate** (date in ISO format)
+6. **Timestamp** (unique time-stamped value)
+7. **Array** (list of values)
+8. **Embedded Documents** (nested documents within a document)
+
+### Example of Document with Multiple Data Types:
+```bash
+db.amazon.insertOne({
+    name: "Amazon",
+    fund: 45842297,
+    isAvailable: true,
+    emp: [
+        { name: "Ajinkya" },
+        { name: "Nikhil" }
+    ],
+    foundOn: new Date(),
+    timestamp: Timestamp()
+})
+```
+
+#### Output:
+```bash
+[
+  {
+    _id: ObjectId('66f5491dbe80faf9a8c73c22'),
+    name: 'Amazon',
+    fund: 45842297,
+    isAvailable: true,
+    emp: [ { name: 'Ajinkya' }, { name: 'Nikhil' } ],
+    foundOn: ISODate('2024-09-26T11:44:29.739Z'),
+    timestamp: Timestamp({ t: 1727351069, i: 1 })
+  }
+]
+```
+
+In this example, you can see the use of different data types like `ObjectId`, `ISODate`, and `Timestamp`, as well as an array for the `emp` field, which stores a list of employees.
+
+### Checking Data Types
+You can check the data type of any field using the `typeof` operator:
+
+#### Example Queries:
+```bash
+typeof db.amazon.findOne().name        // Returns: string
+typeof db.amazon.findOne()._id         // Returns: object
+typeof db.amazon.findOne().timestamp   // Returns: object
+typeof db.amazon.findOne().emp         // Returns: object
+typeof db.amazon.findOne().isAvailable // Returns: boolean
+```
+
+---
