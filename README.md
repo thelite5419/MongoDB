@@ -464,3 +464,200 @@ typeof db.amazon.findOne().isAvailable // Returns: boolean
 ```
 
 ---
+## Ordered Inserts in MongoDB
+
+When using the `insertMany()` method in MongoDB, you can insert multiple documents at once. By default, MongoDB executes these inserts in order, which means that if an error occurs, the process will stop at that point and no further documents will be inserted.
+
+### Example:
+```bash
+db.students.insertMany([
+    { _id: "C", name: "C", price: 250 },
+    { _id: "b", name: "D", price: 350 },
+    { _id: "E", name: "E", price: 350 }
+])
+```
+
+In this case, if a document with `_id: "b"` already exists, the insert will stop at that point and return an error. Any documents after the one that caused the error will **not** be inserted.
+
+### Using the `ordered` Option:
+To avoid stopping the insertion when an error occurs, you can use the `ordered: false` option. This allows MongoDB to continue inserting the remaining documents, even if some inserts fail.
+
+```bash
+db.students.insertMany([
+    { _id: "C", name: "C", price: 250 },
+    { _id: "b", name: "D", price: 350 },
+    { _id: "E", name: "E", price: 350 }
+], { ordered: false })
+```
+
+Here, MongoDB will attempt to insert all documents. Even though `_id: "b"` already exists and will raise an error, documents `C` and `E` will still be inserted.
+
+---
+
+## Schema Validation in MongoDB
+
+MongoDB allows you to define validation rules for your collections to ensure that data meets certain criteria before being inserted. This is done using `$jsonSchema` in the collection creation process.
+
+### Example of Schema Validation:
+```bash
+db.createCollection("nonFiction", {
+    validator: {
+        $jsonSchema: {
+            required: ['name', 'price'],
+            properties: {
+                name: {
+                    bsonType: 'string',
+                    description: "must be a string"
+                },
+                price: {
+                    bsonType: 'number',
+                    description: "must be a number"
+                }
+            }
+        }
+    }
+})
+```
+
+- **Validator**: Adds validation rules to the collection.
+- **$jsonSchema**: Defines the validation schema.
+- **Required**: Ensures that certain fields (`name`, `price`) are mandatory when inserting documents.
+- **bsonType**: Specifies the data type for each field.
+- **Description**: Provides an error message when validation fails.
+
+### Example of Validation Error:
+```bash
+db.nonFiction.insertOne({ name: "agnipath" })
+```
+
+**Error**:
+```bash
+{
+  "failingDocumentId": ObjectId('66feb87b0c0fdfe946c73bfa'),
+  "details": {
+    "operatorName": "$jsonSchema",
+    "schemaRulesNotSatisfied": [
+      {
+        "operatorName": "required",
+        "specifiedAs": { "required": [ 'name', 'price' ] },
+        "missingProperties": [ 'price' ]
+      }
+    ]
+  }
+}
+```
+
+In this case, the document is missing the required `price` field, so MongoDB returns an error.
+
+### Correct Insert:
+```bash
+db.nonFiction.insertOne({ name: "agnipath", price: 100 })
+```
+
+**Result**:
+```bash
+{
+  "acknowledged": true,
+  "insertedId": ObjectId('66feb8c60c0fdfe946c73bfb')
+}
+```
+
+---
+
+## Updating Validation Rules
+
+You can modify the schema validation rules of an existing collection using the `collMod` command.
+
+### Example of Adding a New Field Validation:
+```bash
+db.runCommand({
+    collMod: 'nonFiction',
+    validator: {
+        $jsonSchema: {
+            required: ['name', 'price', 'author'],
+            properties: {
+                name: {
+                    bsonType: 'string',
+                    description: "must be a string"
+                },
+                price: {
+                    bsonType: 'number',
+                    description: "must be a number"
+                },
+                author: {
+                    bsonType: 'array',
+                    description: 'required info not filled',
+                    items: {
+                        bsonType: 'object',
+                        required: ['name', 'email'],
+                        properties: {
+                            name: { bsonType: 'string' },
+                            email: { bsonType: 'string' }
+                        }
+                    }
+                }
+            }
+        }
+    }
+})
+```
+
+### Example of Insert with New Validation:
+```bash
+db.nonFiction.insertOne({
+    name: "light",
+    price: 200,
+    author: [{ name: "Prathamesh", email: "" }]
+})
+```
+
+**Result**:
+```bash
+{
+  "acknowledged": true,
+  "insertedId": ObjectId('66febdc28f11758d13c73bf9')
+}
+```
+
+In this case, the `author` field is required to be an array of objects, each containing `name` and `email`.
+
+### Validation Error Example:
+```bash
+db.nonFiction.insertOne({
+    name: "light",
+    price: 200,
+    author: ""
+})
+```
+
+**Error**:
+```bash
+{
+  "failingDocumentId": ObjectId('66febd988f11758d13c73bf8'),
+  "details": {
+    "operatorName": "$jsonSchema",
+    "schemaRulesNotSatisfied": [
+      {
+        "operatorName": "properties",
+        "propertiesNotSatisfied": [
+          {
+            "propertyName": "author",
+            "description": "required info not filled",
+            "details": [
+              {
+                "operatorName": "bsonType",
+                "specifiedAs": { "bsonType": "array" },
+                "reason": "type did not match",
+                "consideredValue": "",
+                "consideredType": "string"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+This error occurs because the `author` field is expected to be an array, but a string was provided.
