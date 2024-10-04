@@ -661,3 +661,287 @@ db.nonFiction.insertOne({
 ```
 
 This error occurs because the `author` field is expected to be an array, but a string was provided.
+---
+
+
+## Atomicity in MongoDB
+
+MongoDB provides atomicity at the document level by default. This means that a document is either fully inserted, updated, or not at all. There are no partial updates or inserts, ensuring data integrity for individual operations.
+
+automicity is only done at the documents level
+
+---
+
+## MongoImport in MongoDB
+
+`mongoimport` is a utility used to import JSON documents into MongoDB. Here's how you can use it:
+
+### Installation Steps (Post MongoDB 4.0):
+
+1. Download **MongoDB Command Line Database Tools** (.msi) from the official MongoDB website.
+2. Copy the bin path after installation.
+3. Open **Environment Variables** (System Settings).
+4. Edit the **Path** variable and add the bin path.
+5. Open the command prompt and run the following command:
+
+```bash
+mongoimport "[file_path]" -d [database_name] -c [collection_name] --jsonArray --drop
+```
+
+- `-d`: Specifies the database. If it doesn't exist, MongoDB will create it.
+- `-c`: Specifies the collection. If it doesn't exist, MongoDB will create it.
+- `--jsonArray`: Informs MongoDB that the input file contains an array of JSON documents.
+- `--drop`: Drops the existing collection before importing the new data.
+
+---
+
+## Comparison Operators in MongoDB
+
+MongoDB supports various comparison operators for querying documents.
+
+### `$eq` - Equal
+```bash
+db.students.find({age: {$eq: 30}})
+```
+Returns documents where `age` is equal to 30.
+
+### `$ne` - Not Equal
+```bash
+db.students.find({age: {$ne: 30}})
+```
+Returns documents where `age` is not equal to 30.
+
+### `$lt` - Less Than
+```bash
+db.students.find({age: {$lt: 30}})
+```
+Returns documents where `age` is less than 30.
+
+### `$gt` - Greater Than
+```bash
+db.students.find({age: {$gt: 30}})
+```
+Returns documents where `age` is greater than 30.
+
+### `$gte` - Greater Than or Equal
+```bash
+db.students.find({age: {$gte: 30}})
+```
+Returns documents where `age` is greater than or equal to 30.
+
+### `$lte` - Less Than or Equal
+```bash
+db.students.find({age: {$lte: 30}})
+```
+Returns documents where `age` is less than or equal to 30.
+
+### `$in` - Matches Any Value in Array
+```bash
+db.students.find({age: {$in: [30, 32]}})
+```
+Returns documents where `age` is either 30 or 32.
+
+### Example Output:
+```json
+[
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bf9'),
+    "name": "Jane Smith",
+    "age": 32,
+    "hobbies": ["painting", "traveling"],
+    "hasAadharCard": true
+  },
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bfc'),
+    "name": "David Johnson",
+    "age": 30,
+    "hobbies": ["coding", "playing guitar"],
+    "hasAadharCard": true
+  }
+]
+```
+
+### `$nin` - Not in Array
+```bash
+db.students.find({age: {$nin: [30, 32]}})
+```
+Returns documents where `age` is neither 30 nor 32.
+
+### Example Output:
+```json
+[
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bf8'),
+    "name": "John Doe",
+    "age": 28,
+    "hobbies": ["reading", "cycling", "hiking"],
+    "hasAadharCard": true
+  },
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bfb'),
+    "name": "Lucy Brown",
+    "age": 25,
+    "hobbies": ["dancing", "sketching"],
+    "hasAadharCard": true
+  },
+  {
+    "_id": ObjectId('66fff8844fd0854591c73c01'),
+    "name": "Olivia Martin",
+    "age": 26,
+    "hobbies": ["gardening", "knitting"],
+    "hasAadharCard": true
+  }
+]
+```
+
+---
+
+## Logical Operators in MongoDB
+
+MongoDB also supports a variety of logical operators that allow you to combine multiple conditions in a query. Here’s an overview of the most common logical operators:
+
+- `$and`: Matches documents that satisfy all the specified conditions.
+- `$or`: Matches documents that satisfy at least one of the specified conditions.
+- `$not`: Inverts the effect of a query expression.
+- `$nor`: Matches documents that fail all the specified conditions.
+
+### `$or` - Logical OR
+
+The `$or` operator selects documents where at least one condition is met.
+
+```bash
+db.students.find({ $or: [{ age: { $lt: 25 } }, { age: { $gt: 32 } }] })
+```
+
+This query retrieves documents where `age` is either less than 25 or greater than 32.
+
+#### Example Output:
+```json
+[
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bfa'),
+    "name": "Sam Wilson",
+    "age": 22,
+    "hobbies": ["gaming", "swimming", "photography"],
+    "hasAadharCard": false
+  },
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bfe'),
+    "name": "Michael Clark",
+    "age": 35,
+    "hobbies": ["cooking", "woodworking"],
+    "hasAadharCard": true
+  },
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bff'),
+    "name": "Sophia Miller",
+    "age": 24,
+    "hobbies": ["writing", "rock climbing"],
+    "hasAadharCard": false
+  }
+]
+```
+
+### `$nor` - Logical NOR
+
+The `$nor` operator selects documents that do not match any of the given conditions. It behaves like the opposite of `$or`.
+
+```bash
+db.students.find({ $nor: [{ age: { $lt: 25 } }, { age: { $gt: 32 } }] })
+```
+
+This query retrieves documents where `age` is neither less than 25 nor greater than 32 (i.e., between 25 and 32).
+
+#### Example Output:
+```json
+[
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bf8'),
+    "name": "John Doe",
+    "age": 28,
+    "hobbies": ["reading", "cycling", "hiking"],
+    "hasAadharCard": true
+  },
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bf9'),
+    "name": "Jane Smith",
+    "age": 32,
+    "hobbies": ["painting", "traveling"],
+    "hasAadharCard": true
+  },
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bfb'),
+    "name": "Lucy Brown",
+    "age": 25,
+    "hobbies": ["dancing", "sketching"],
+    "hasAadharCard": true
+  }
+]
+```
+
+### `$and` - Logical AND
+
+The `$and` operator selects documents that meet **all** the specified conditions.
+
+```bash
+db.students.find({ $and: [{ age: { $gt: 25 } }, { age: { $lt: 30 } }] })
+```
+
+This query retrieves documents where `age` is greater than 25 **and** less than 30.
+
+#### Example Output:
+```json
+[
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bf8'),
+    "name": "John Doe",
+    "age": 28,
+    "hobbies": ["reading", "cycling", "hiking"],
+    "hasAadharCard": true
+  },
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bfd'),
+    "name": "Emma Davis",
+    "age": 27,
+    "hobbies": ["blogging", "running", "yoga"],
+    "hasAadharCard": false
+  },
+  {
+    "_id": ObjectId('66fff8844fd0854591c73c01'),
+    "name": "Olivia Martin",
+    "age": 26,
+    "hobbies": ["gardening", "knitting"],
+    "hasAadharCard": true
+  }
+]
+```
+
+**Note:** Without `$and`, MongoDB will interpret the query conditions independently, potentially ignoring the first condition and using only the second one. To enforce both conditions, the `$and` operator is necessary.
+
+```db.students.find({{age: {$gt:25}}, {age:{$lt: 30} } } )```
+
+
+it ignores the ```{age: {$gt:25}}``` this condition and moves forward to give the answer relatex to the  ```{age:{$lt: 30}}``` this condition 
+
+to avoid this we use the and operator
+
+
+### `$not` - Logical NOT
+
+The `$not` operator inverts the effect of a query expression. It returns documents that do not match the specified condition.
+
+```bash
+db.products.find({
+  inStock: { $not: { $eq: true } }
+})
+```
+
+This query retrieves products where `inStock` is **not true** (i.e., where `inStock` is `false`).
+
+#### Example Output:
+```json
+[
+  { "_id": 2, "name": "Mouse", "price": 25, "inStock": false },
+  { "_id": 4, "name": "Keyboard", "price": 100, "inStock": false }
+]
+```
