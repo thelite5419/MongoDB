@@ -945,3 +945,80 @@ This query retrieves products where `inStock` is **not true** (i.e., where `inSt
   { "_id": 4, "name": "Keyboard", "price": 100, "inStock": false }
 ]
 ```
+---
+## Element Query Operators in MongoDB
+
+Element query operators in MongoDB help in filtering documents based on whether a field exists or its data type. Two important operators in this category are `$exists` and `$type`.
+
+### `$exists` - Field Existence Check
+
+The `$exists` operator checks if a field exists in a document or not. It can be used to filter documents based on the presence or absence of a specific field.
+
+#### Example:
+
+```bash
+db.students.find({ hasLaptop: { $exists: true } })
+```
+
+This query retrieves all documents where the `hasLaptop` field exists, regardless of its value.
+
+#### Example Output:
+```json
+[
+  {
+    "_id": ObjectId('670008404fd0854591c73c02'),
+    "name": "Prathamesh",
+    "age": 20,
+    "hobbies": ["watching movies", "editing"],
+    "hasLaptop": true
+  }
+]
+```
+
+You can combine `$exists` with additional conditions to filter documents more precisely.
+
+#### Example with `$eq`:
+
+```bash
+db.students.find({ hasLaptop: { $exists: true, $eq: true } })
+```
+
+This query retrieves documents where the `hasLaptop` field exists **and** its value is `true`.
+
+#### Example Output:
+```json
+[
+  {
+    "_id": ObjectId('670008404fd0854591c73c02'),
+    "name": "Prathamesh",
+    "age": 20,
+    "hobbies": ["watching movies", "editing"],
+    "hasLaptop": true
+  }
+]
+```
+
+### `$type` - Field Type Check
+
+The `$type` operator allows you to filter documents based on the type of the value in a specific field. It is useful when you want to check for fields with specific data types.
+
+#### Example:
+
+```bash
+db.students.find({ hasLaptop: { $type: "bool" } })
+```
+
+This query retrieves documents where the `hasLaptop` field is of the Boolean (`bool`) type.
+
+#### Example Output:
+```json
+[
+  {
+    "_id": ObjectId('670008404fd0854591c73c02'),
+    "name": "Prathamesh",
+    "age": 20,
+    "hobbies": ["watching movies", "editing"],
+    "hasLaptop": true
+  }
+]
+```
