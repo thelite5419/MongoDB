@@ -1411,3 +1411,186 @@ If no document with the name **Prathamesh** exists, the query will insert a new 
 ```
 
 ---
+## MongoDB Array Update Operations
+
+MongoDB allows you to update arrays in documents using various operators. These operators make it easy to add, remove, or modify elements in an array field.
+
+### 1. Updating Nested Arrays
+
+To update specific elements within a nested array, we can use `$elemMatch` to match the condition and then apply the update. For example, consider the following document:
+
+```json
+{
+  _id: ObjectId('67010fa8b3f83f2a05c73bfb'),
+  name: 'gauri',
+  hobbies: [ 'talking', 'dancing' ],
+  hasAadharCard: true,
+  experience: [
+    { companyName: 'Company XYZ', duration: '2 years' },
+    { companyName: 'Amazon', duration: '2 years' }
+  ],
+  age: 20
+}
+```
+
+#### Scenario: Add a field `experienced: true` to the company where the `duration` is '2 years'.
+
+```bash
+db.students.updateMany(
+  { "experience": { $elemMatch: { duration: "2 years" } } },
+  { $set: { "experience.$.experienced": true } }
+)
+```
+
+#### Example Output:
+
+```json
+[
+  {
+    _id: ObjectId('67010fa8b3f83f2a05c73bfb'),
+    name: 'gauri',
+    hobbies: [ 'talking', 'dancing' ],
+    hasAadharCard: true,
+    experience: [
+      {
+        companyName: 'Company XYZ',
+        duration: '2 years',
+        experienced: true
+      },
+      {
+        companyName: 'Amazon',
+        duration: '2 years'
+      }
+    ],
+    age: 20
+  }
+]
+```
+
+This update adds the field `experienced: true` to the company with `duration: '2 years'`.
+
+---
+
+### 2. `$push`: Add an Element to an Array
+
+The `$push` operator allows you to **add an element** to the end of an array. If the field is not an array, `$push` creates it.
+
+- To add a new company to Gauri's `experience` array:
+
+```bash
+db.students.updateOne(
+  { name: 'gauri' },
+  { $push: { experience: { companyName: 'Meta', duration: '3 years' } } }
+)
+```
+
+---
+
+### 3. `$pull`: Remove an Element from an Array
+
+The `$pull` operator removes all elements from an array that match a specified condition.
+
+- To **remove** the company `Meta` from Gauri's `experience` array:
+
+```bash
+db.students.updateOne(
+  { name: 'gauri' },
+  { $pull: { experience: { companyName: 'Meta', duration: '3 years' } } }
+)
+```
+
+---
+
+### 4. `$addToSet`: Add an Element to an Array (No Duplicates)
+
+The `$addToSet` operator adds a value to an array **only if it does not already exist**. This prevents duplicates.
+
+- To add a company to Gauri's `experience` array only if it doesn't already exist:
+
+```bash
+db.students.updateOne(
+  { name: 'gauri' },
+  { $addToSet: { experience: { companyName: 'Meta', duration: '3 years' } } }
+)
+```
+
+If `Meta` with `3 years` already exists in the `experience` array, this operation will not add it again.
+
+---
+
+### 5. `$pop`: Remove the First or Last Element of an Array
+
+The `$pop` operator removes an element from the beginning or end of an array.
+
+- To remove the **last** element from Gauri's `experience` array:
+
+```bash
+db.students.updateOne(
+  { name: 'gauri' },
+  { $pop: { experience: 1 } }
+)
+```
+
+- To remove the **first** element from Gauri's `experience` array:
+
+```bash
+db.students.updateOne(
+  { name: 'gauri' },
+  { $pop: { experience: -1 } }
+)
+```
+
+---
+
+### Example Document Before and After Updates:
+
+#### Original Document:
+
+```json
+{
+  _id: ObjectId('67010fa8b3f83f2a05c73bfb'),
+  name: 'gauri',
+  hobbies: [ 'talking', 'dancing' ],
+  hasAadharCard: true,
+  experience: [
+    { companyName: 'Company XYZ', duration: '2 years' },
+    { companyName: 'Amazon', duration: '2 years' }
+  ],
+  age: 20
+}
+```
+
+#### After Adding `experienced: true`:
+
+```json
+{
+  _id: ObjectId('67010fa8b3f83f2a05c73bfb'),
+  name: 'gauri',
+  hobbies: [ 'talking', 'dancing' ],
+  hasAadharCard: true,
+  experience: [
+    { companyName: 'Company XYZ', duration: '2 years', experienced: true },
+    { companyName: 'Amazon', duration: '2 years' }
+  ],
+  age: 20
+}
+```
+
+#### After Pushing `Meta` to the Array:
+
+```json
+{
+  _id: ObjectId('67010fa8b3f83f2a05c73bfb'),
+  name: 'gauri',
+  hobbies: [ 'talking', 'dancing' ],
+  hasAadharCard: true,
+  experience: [
+    { companyName: 'Company XYZ', duration: '2 years', experienced: true },
+    { companyName: 'Amazon', duration: '2 years' },
+    { companyName: 'Meta', duration: '3 years' }
+  ],
+  age: 20
+}
+```
+
+---
