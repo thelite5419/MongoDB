@@ -1022,3 +1022,136 @@ This query retrieves documents where the `hasLaptop` field is of the Boolean (`b
   }
 ]
 ```
+---
+
+## Evaluation Operators in MongoDB
+
+Evaluation operators in MongoDB allow you to perform complex operations, comparisons, and expressions directly within your queries. These operators are particularly useful for running calculations and conditional checks during data retrieval. Below are some commonly used evaluation operators:
+
+### `$expr` - Expression Evaluation
+
+The `$expr` operator enables the use of MongoDB expressions to evaluate conditions within queries. You can perform comparisons, arithmetic operations, and other expressions within query pipelines.
+
+#### Example:
+
+```bash
+db.collection.find({
+  $expr: {
+    $gt: ["$field1", "$field2"]
+  }
+})
+```
+
+This query finds all documents where `field1` is greater than `field2`.
+
+#### Arithmetic Example:
+
+```bash
+db.collection.find({
+  $expr: {
+    $gt: ["$price", { $avg: "$price" }]
+  }
+})
+```
+
+This query retrieves all documents where the value of `price` is greater than the average `price` value of all documents in the collection.
+
+> **Note:** The `$expr` operator was introduced in MongoDB 3.6 and is very versatile, supporting all aggregation expressions.
+
+---
+
+### `$regex` - Regular Expression Pattern Matching
+
+The `$regex` operator is used to search for documents by matching fields against regular expression patterns. It's useful for string pattern searches, like finding documents where a string starts or ends with a certain character.
+
+#### Example:
+
+```bash
+db.students.find({ name: { $regex: /^p/ } })
+```
+
+This query finds all documents where the `name` field starts with the letter "P".
+
+#### Example Output:
+
+```json
+[
+  {
+    "_id": ObjectId('670008404fd0854591c73c02'),
+    "name": "Prathamesh",
+    "age": 20,
+    "hobbies": ["watching movies", "editing"],
+    "hasLaptop": true
+  }
+]
+```
+
+---
+
+### `$text` - Text Search
+
+The `$text` operator enables text-based search within documents. MongoDB uses a text index to search for matching text in specified fields.
+
+#### Example:
+
+```bash
+db.students.find({
+  $text: {
+    $search: "writing"
+  }
+})
+```
+
+This query will return documents where the text field contains the word "writing".
+
+> **Note:** To use `$text`, you must first create a text index on the fields where you want to perform the search.
+
+---
+
+### `$mod` - Modulo Operation
+
+The `$mod` operator performs a modulo operation, which returns documents where the field's value divided by a specified number has a remainder that matches a given value.
+
+#### Example:
+
+```bash
+db.students.find({
+  age: {
+    $mod: [3, 0]
+  }
+})
+```
+
+This query returns documents where the `age` field divided by 3 has a remainder of 0, meaning the age is a multiple of 3.
+
+#### Example Output:
+
+```json
+[
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bfc'),
+    "name": "David Johnson",
+    "age": 30,
+    "hobbies": ["coding", "playing guitar"],
+    "hasAadharCard": true
+  },
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bfd'),
+    "name": "Emma Davis",
+    "age": 27,
+    "hobbies": ["blogging", "running", "yoga"],
+    "hasAadharCard": false
+  },
+  {
+    "_id": ObjectId('66fff8844fd0854591c73bff'),
+    "name": "Sophia Miller",
+    "age": 24,
+    "hobbies": ["writing", "rock climbing"],
+    "hasAadharCard": false
+  }
+]
+```
+
+In this example, the query returns students whose age is divisible by 3.
+
+---
