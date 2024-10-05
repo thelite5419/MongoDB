@@ -1155,3 +1155,137 @@ This query returns documents where the `age` field divided by 3 has a remainder 
 In this example, the query returns students whose age is divisible by 3.
 
 ---
+
+## Querying Arrays in MongoDB
+
+MongoDB allows querying arrays in documents efficiently, whether the array contains simple values (like strings) or complex objects. Below are common use cases and how to handle them.
+
+### Querying Arrays with Objects
+
+Suppose you have a document like the following:
+
+```json
+{
+  name: 'Gauri',
+  age: 21,
+  hobbies: ['talking', 'dancing'],
+  hasAadharCard: true,
+  experience: [
+    {
+      companyName: 'Company XYZ',
+      duration: '2 years'
+    },
+    {
+      companyName: 'Amazon',
+      duration: '2 years'
+    }
+  ]
+}
+```
+
+### Query to Find Documents with a Specific Array Element
+
+To find people who have worked at **Amazon**, you can query an object within an array:
+
+```bash
+db.students.find({ "experience.companyName": "Amazon" })
+```
+
+#### Example Output:
+
+```json
+[
+  {
+    "_id": ObjectId('67010fa8b3f83f2a05c73bfb'),
+    "name": "Gauri",
+    "age": 21,
+    "hobbies": ["talking", "dancing"],
+    "hasAadharCard": true,
+    "experience": [
+      { "companyName": "Company XYZ", "duration": "2 years" },
+      { "companyName": "Amazon", "duration": "2 years" }
+    ]
+  }
+]
+```
+
+### Querying Simple Arrays
+
+If the array contains simple values like strings, such as in the `hobbies` field, you can search for an array element as follows:
+
+```bash
+db.students.find({ hobbies: "talking" })
+```
+
+This query will return all documents where the `hobbies` array contains the string "talking."
+
+### Query to Count Documents
+
+To find the number of people who have worked at **Amazon**, use:
+
+```bash
+db.students.find({ "experience.companyName": "Amazon" }).size()
+```
+
+This query will return the count of documents that match the condition.
+
+### Querying Arrays Based on Length
+
+You can query documents based on the length of an array field using the `$size` operator:
+
+- To find students who have **only one company** in their `experience` array:
+
+```bash
+db.students.find({ experience: { $size: 1 } })
+```
+
+> **Note:** MongoDB does not support conditional operators (like `$gte`, `$lte`) directly with `$size`. For complex size-based queries, you can use the `$expr` operator.
+
+### Conditional Array Length Queries
+
+If you want to find documents where the `experience` array has **two or more companies**, you can use `$expr`:
+
+```bash
+db.students.find({
+  $expr: { $gte: [{ $size: "$experience" }, 2] }
+})
+```
+
+This query returns documents where the size of the `experience` array is greater than or equal to 2.
+
+---
+
+## Sorting Documents in MongoDB
+
+MongoDB allows sorting documents based on one or more fields. You can specify the sort order using:
+
+- `1` for **ascending** order
+- `-1` for **descending** order
+
+### Sorting by One Field
+
+To sort the documents based on the `age` field in **ascending order**:
+
+```bash
+db.students.find().sort({ age: 1 })
+```
+
+To sort documents by `age` in **descending order**:
+
+```bash
+db.students.find().sort({ age: -1 })
+```
+
+### Sorting by Multiple Fields
+
+You can also sort by multiple fields. If sorting by `age` in ascending order, but if two documents have the same `age`, they are then sorted by `name` in **descending order**:
+
+```bash
+db.students.find().sort({ age: 1, name: -1 })
+```
+
+### Getting Sorted Documents as an Array
+
+By default, MongoDB returns a cursor for the `find()` query. If you want all documents returned at once and sorted, you can use the `.forEach()` function or chaining like `.toArray()` for further operations. Additionally, you can use `.limit()` or `.skip()` to control the number of documents returned or offset the results.
+
+---
