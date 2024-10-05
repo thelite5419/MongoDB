@@ -1289,3 +1289,125 @@ db.students.find().sort({ age: 1, name: -1 })
 By default, MongoDB returns a cursor for the `find()` query. If you want all documents returned at once and sorted, you can use the `.forEach()` function or chaining like `.toArray()` for further operations. Additionally, you can use `.limit()` or `.skip()` to control the number of documents returned or offset the results.
 
 ---
+
+## Advanced Update Operations in MongoDB
+
+MongoDB provides several advanced update operators that allow you to modify documents in various ways. Below are the most commonly used operators, with practical examples.
+
+### 1. `$inc`: Increment or Decrement Field Values
+
+The `$inc` operator increments or decrements the value of a field by a specified amount. It is commonly used to adjust numerical fields, such as counters or ages.
+
+- To **increment** the age by 1 for all documents:
+
+```bash
+db.students.updateMany({}, { $inc: { age: 1 } })
+```
+
+- To **decrement** the age by 1 for all documents:
+
+```bash
+db.students.updateMany({}, { $inc: { age: -1 } })
+```
+
+---
+
+### 2. `$min` and `$max`: Setting Minimum and Maximum Values
+
+- The `$max` operator **increases** the value of a field if the new value is greater than the current value.
+  
+- The `$min` operator **decreases** the value of a field if the new value is smaller than the current value.
+
+#### Example:
+
+- To set the `age` of **Gauri** to a **maximum** value of 25 (if it's lower than 25, it will be updated to 25):
+
+```bash
+db.students.updateMany({ name: "gauri" }, { $max: { age: 25 } })
+```
+
+- To set the `age` of **Gauri** to a **minimum** value of 20 (if it's higher than 20, it will be updated to 20):
+
+```bash
+db.students.updateMany({ name: "gauri" }, { $min: { age: 20 } })
+```
+
+---
+
+### 3. `$mul`: Multiply Field Values
+
+The `$mul` operator multiplies the value of a field by a specified factor. It is useful when you need to apply a scaling factor to numeric fields.
+
+- To **double** the age of **Gauri** (multiply by 2):
+
+```bash
+db.students.updateMany({ name: "gauri" }, { $mul: { age: 2 } })
+```
+
+#### Example Output:
+
+After multiplying Gauri's age by 2, the document will look like this:
+
+```json
+{
+  "_id": ObjectId('67010fa8b3f83f2a05c73bfb'),
+  "name": "gauri",
+  "age": 40,
+  "hobbies": ["talking", "dancing"],
+  "hasAadharCard": true,
+  "experience": [
+    { "companyName": "Company XYZ", "duration": "2 years" },
+    { "companyName": "Amazon", "duration": "2 years" }
+  ]
+}
+```
+
+---
+
+### 4. `$unset`: Remove a Field
+
+The `$unset` operator removes a field from a document. This is useful if you no longer need a particular field in your documents.
+
+- To remove the `experience` field from all documents:
+
+```bash
+db.students.updateMany({}, { $unset: { experience: "" } })
+```
+
+---
+
+### 5. `$rename`: Rename a Field
+
+The `$rename` operator changes the name of a field. It is helpful when you want to modify the schema without losing data.
+
+- To rename the field `value` to `age`:
+
+```bash
+db.students.updateMany({}, { $rename: { value: "age" } })
+```
+
+---
+
+### 6. `$upsert`: Insert a Document if No Match is Found
+
+The `$upsert` option is used with the `update` operation. If the query does not match any documents, it **inserts** a new document with the specified update fields.
+
+- To **insert** a document for **Prathamesh** with an `age` of 20 if no such document exists:
+
+```bash
+db.students.updateMany({ name: "prathamesh" }, { $set: { age: 20 } }, { upsert: true })
+```
+
+#### Example Output:
+
+If no document with the name **Prathamesh** exists, the query will insert a new document:
+
+```json
+{
+  "_id": ObjectId('670123540600953f5b38d7d7'),
+  "name": "prathamesh",
+  "age": 20
+}
+```
+
+---
