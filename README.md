@@ -1915,4 +1915,122 @@ In addition to counting the students in each age group, this query also pushes t
 - **`output`**: Define what fields to include in the result (e.g., counts, lists, etc.).
 
 The `$bucket` operator helps you categorize and analyze documents based on value ranges, making it a useful tool for data analysis and reporting.
+
+---
+# $lookup
+The `$lookup` operator in MongoDB is used to perform a left outer join between two collections, similar to SQL joins. It allows you to bring together related data from different collections by specifying the fields from both collections that should match.
+
+### Steps to Use `$lookup` in MongoDB:
+
+1. **Source Collection**: The collection where the `$lookup` operation is initiated (e.g., `customers`).
+2. **Foreign Collection**: The collection to be joined (e.g., `orders`).
+3. **Fields to Match**: Specify the field in both collections that should match.
+4. **Output Field**: The results of the join are stored in an array within the source collection document.
+
+### Example: Joining `customers` and `orders`
+
+#### 1. Insert Customers:
+
+```js
+db.customers.insertMany([
+  { _id: 1, name: "John Smith", age: 30, gender: "Male", email: "john.smith@example.com" },
+  { _id: 2, name: "Emma Johnson", age: 28, gender: "Female", email: "emma.johnson@example.com" },
+  { _id: 3, name: "Alex Patel", age: 35, gender: "Non-binary", email: "alex.patel@example.com" }
+]);
+```
+
+#### 2. Insert Orders:
+
+```js
+db.orders.insertMany([
+  { _id: 101, customer_id: 1, product: "Laptop", quantity: 1, price: 1200 },
+  { _id: 102, customer_id: 1, product: "Smartphone", quantity: 2, price: 800 },
+  { _id: 103, customer_id: 2, product: "Headphones", quantity: 1, price: 150 },
+  { _id: 104, customer_id: 3, product: "Monitor", quantity: 1, price: 300 }
+]);
+```
+
+#### 3. Perform the `$lookup`:
+
+```js
+db.customers.aggregate([
+  {
+    $lookup: {
+      from: "orders",            // Collection to join
+      localField: "_id",          // Field from 'customers'
+      foreignField: "customer_id", // Field from 'orders'
+      as: "order_details"         // Field to store the joined documents
+    }
+  }
+]).pretty();
+```
+
+### Example Output:
+
+```json
+[
+  {
+    "_id": 1,
+    "name": "John Smith",
+    "age": 30,
+    "gender": "Male",
+    "email": "john.smith@example.com",
+    "order_details": [
+      {
+        "_id": 101,
+        "customer_id": 1,
+        "product": "Laptop",
+        "quantity": 1,
+        "price": 1200
+      },
+      {
+        "_id": 102,
+        "customer_id": 1,
+        "product": "Smartphone",
+        "quantity": 2,
+        "price": 800
+      }
+    ]
+  },
+  {
+    "_id": 2,
+    "name": "Emma Johnson",
+    "age": 28,
+    "gender": "Female",
+    "email": "emma.johnson@example.com",
+    "order_details": [
+      {
+        "_id": 103,
+        "customer_id": 2,
+        "product": "Headphones",
+        "quantity": 1,
+        "price": 150
+      }
+    ]
+  },
+  {
+    "_id": 3,
+    "name": "Alex Patel",
+    "age": 35,
+    "gender": "Non-binary",
+    "email": "alex.patel@example.com",
+    "order_details": [
+      {
+        "_id": 104,
+        "customer_id": 3,
+        "product": "Monitor",
+        "quantity": 1,
+        "price": 300
+      }
+    ]
+  }
+]
+```
+
+### Explanation:
+- **`localField`**: The field from the `customers` collection (`_id`).
+- **`foreignField`**: The field from the `orders` collection (`customer_id`).
+- **`as`**: The result of the join is stored as an array called `order_details`.
+
+This join will show each customer along with their respective orders in the `order_details` field. If a customer does not have any orders, the `order_details` array will be empty, reflecting the nature of a **left outer join**.
 ---
