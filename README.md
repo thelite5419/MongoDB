@@ -661,8 +661,8 @@ db.nonFiction.insertOne({
 ```
 
 This error occurs because the `author` field is expected to be an array, but a string was provided.
----
 
+---
 
 ## Atomicity in MongoDB
 
