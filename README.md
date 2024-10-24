@@ -1594,3 +1594,175 @@ db.students.updateOne(
 ```
 
 ---
+## MongoDB Indexing
+### **1. Collection Scan (Collscan)**:
+- A **collection scan** (`collscan`) is similar to a **linear search**, where MongoDB searches through each document in the collection one by one, in the order they are stored.
+- This method is slow and inefficient for large collections.
+  
+#### Example:
+```bash
+db.collectionName.find();
+```
+- This query performs a full scan of the collection, which can take longer as the size of the collection increases.
+
+
+
+### **2. Indexing Scan**:
+- An **indexing scan** is a faster, more efficient search technique that uses indexing, similar to a **binary search**.
+- **Indexes** are applied on specific fields like `age`, `name`, or `salary` and are stored separately in a **sorted** structure.
+  
+When querying an indexed field:
+- MongoDB first searches the index (which is sorted) using a **binary search**, speeding up the data retrieval process.
+- Once the correct entry is found in the index, it uses the **pointer** to quickly locate the actual document in the collection.
+
+
+### **How Indexing Works**:
+- **Indexes** are stored in a **B-tree data structure**, which contains **index keys** and **pointers** to the original documents.
+- Indexing helps MongoDB avoid scanning the entire collection and instead, allows it to navigate through a smaller, sorted set of keys.
+  
+### **Space and Performance Considerations**:
+- While indexing significantly improves read performance, it comes with trade-offs:
+  - **Space**: Indexes take up additional disk space to store sorted structures.
+  - **Write Performance**: When indexed values are updated, the corresponding index tree needs to adjust, which can slow down write operations.
+  
+Due to this, not all fields should be indexed, especially in cases like:
+- Frequently updated collections.
+- Complex queries.
+- Large collections where too many indexes may lead to overhead.
+
+
+
+### **1. Single Field Index**
+
+A **single field index** is created on a specific field in the collection to improve query performance. It allows MongoDB to quickly search, sort, or retrieve documents based on the indexed field.
+
+#### Example:
+```bash
+db.collectionName.find().explain("executionStats");
+```
+- This command provides insight into the query execution plan, including whether a **collection scan (collscan)** or an **index scan (indexscan)** is being used.
+
+```bash
+db.collectionName.createIndex({age: 1});
+```
+- Creates an ascending index on the `age` field.
+
+```bash
+db.collectionName.getIndexes();
+```
+- Lists all available indexes in the collection:
+  ```json
+  [
+    { v: 2, key: { _id: 1 }, name: '_id_' },
+    { v: 2, key: { age: 1 }, name: 'age_1' }
+  ]
+  ```
+
+- You can also create a **descending order** index:
+  ```bash
+  db.collectionName.createIndex({age: -1});
+  ```
+
+#### When Not to Use Indexing:
+- When the **collection is small**.
+- When queries are **complex** (using multiple fields).
+- When the **collection is frequently updated**, as indexing can slow down write operations.
+- When the **collection is large** (too many indexes can degrade performance).
+
+---
+
+### **2. Compound Index**
+
+A **compound index** is an index on multiple fields. It allows MongoDB to efficiently query on combinations of fields, improving performance for more complex queries.
+
+#### Example:
+```bash
+db.collectionName.createIndex({age: 1, gender: 1});
+```
+- This creates a compound index on `age` and `gender`. If multiple documents have the same `age`, MongoDB will further sort them by `gender` (alphabetically, so females appear first).
+
+```bash
+db.collectionName.getIndexes();
+```
+- Lists the compound index:
+  ```json
+  [
+    { v: 2, key: { _id: 1 }, name: '_id_' },
+    { v: 2, key: { age: 1, gender: 1 }, name: 'age_1_gender_1' }
+  ]
+  ```
+
+#### Example Query with Compound Index:
+```bash
+db.collectionName.find({age: {$gte: 25}, gender: "male"}).explain("executionStats");
+```
+- This query will use the **index scan** for both `age` and `gender`.
+
+- **Note**: If you only query on `age`, the **index scan** will be used. But if you only query on `gender`, a **collection scan** may happen, as `gender` is sorted based on `age`.
+
+#### Partial Index:
+You can create partial indexes for specific subsets of data.
+```bash
+db.teachers.createIndex({age: 1}, {partialFilterExpression: {age: {$gte: 22}}});
+```
+- This index applies only to documents where `age` is greater than or equal to 22.
+
+---
+
+### **3. Covered Query**
+
+A **covered query** is a query where all the fields are part of the same index. MongoDB can retrieve the data directly from the index without fetching the actual documents, which is faster.
+
+#### Example:
+```bash
+db.collectionName.find({name: "alex"}, {_id: 0, name: 1});
+```
+- If `name` is indexed, this query will retrieve the data directly from the index, resulting in a fast execution.
+
+---
+
+### **Multiple Index Selection**
+
+When a query could use multiple indexes, MongoDB performs **performance analysis** before execution to determine the most efficient index to use. This result is cached, but the cache is reset after:
+- 1000 writes.
+- MongoDB restart.
+- Index modification.
+
+---
+
+### **4. Text Index**
+
+A **text index** is used for **full-text search**, allowing you to search for documents based on keywords, similar to a search engine. You can only create one text index per collection.
+
+#### Example:
+```bash
+db.collectionName.createIndex({bio: "text"});
+```
+- Creates a text index on the `bio` field.
+
+```bash
+db.collectionName.createIndex({name: 'text', bio: 'text'});
+```
+- Creates a text index on both the `name` and `bio` fields.
+
+```bash
+db.collectionName.find({$text: {$search: "experience"}});
+```
+- Searches the `bio` field for the keyword "experience".
+
+#### Text Index Features:
+- **Stop Words**: MongoDB removes common words (like "and", "the", etc.), and applies **stemming**, which reduces words to their root form (e.g., "walking" → "walk").
+- **Relevance Score**: Text searches return documents based on their relevance to the search term, with higher-matching documents appearing first.
+
+#### Excluding Keywords:
+```bash
+db.collectionName.find({$text: {$search: "experience -manage"}});
+```
+- This query searches for documents containing "experience" but excludes those with the word "manage".
+
+#### Creating Index in the Background:
+```bash
+db.collectionName.createIndex({name: "text"}, {background: true});
+```
+- Creating a text index locks the collection, preventing other queries from running until the index is created. Using the `background: true` option avoids locking the collection but delays text-based queries until the index is fully built.
+---
