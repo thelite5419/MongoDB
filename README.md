@@ -1830,3 +1830,89 @@ db.collection.aggregate(pipeline, options)
 MongoDB also provides the `$filter` stage for more complex conditions inside pipelines. This stage allows you to apply custom filtering to arrays within documents.
 
 ---
+## $bucket
+The `$bucket` operator in MongoDB is used to categorize documents into different groups based on specified boundaries. It is especially useful when you want to divide documents into ranges or "buckets" of data, based on numerical fields.
+
+### When to Use `$bucket`:
+You use the `$bucket` operator when you want to create discrete groups (or buckets) based on the values of a field. For example, you might want to group students by age ranges, sales by price ranges, or products by ratings.
+
+### Example:
+
+#### Task: 
+You want to group students by age:
+- Group 1: Ages 20 to 30.
+- Group 2: Ages 30 to 40.
+- Group 3: Ages 40 and above.
+
+Here’s how you can do it using the `$bucket` operator.
+
+### Basic Example:
+
+```js
+db.emp.aggregate([
+  { $match: { gender: "Female" } }, 
+  { 
+    $bucket: {
+      groupBy: "$age", // Field to group by
+      boundaries: [0, 30, 40], // Define the boundaries for grouping
+      default: "greater than 40 group", // Name for values outside boundaries
+      output: { count: { $sum: 1 } } // Count number of documents in each bucket
+    } 
+  }
+])
+```
+
+#### Explanation:
+- `groupBy: "$age"`: We are grouping by the `age` field.
+- `boundaries: [0, 30, 40]`: This creates two main groups:
+  - One for ages 0 to 30.
+  - Another for ages 30 to 40.
+- `default: "greater than 40 group"`: This is the bucket for ages greater than 40.
+- `output: { count: { $sum: 1 } }`: We are calculating the count of students in each bucket.
+
+#### Output:
+```json
+[
+  { "_id": 0, "count": 2 },  // 2 students between ages 0-30
+  { "_id": 30, "count": 1 }  // 1 student between ages 30-40
+]
+```
+
+### Example with Student Names:
+
+```js
+db.emp.aggregate([
+  { $match: { gender: "Female" } },
+  { 
+    $bucket: {
+      groupBy: "$age",
+      boundaries: [0, 30, 40],
+      default: "greater than 40 group",
+      output: { 
+        count: { $sum: 1 }, // Count of students in each group
+        name: { $push: "$name" } // Push names into each group
+      }
+    }
+  }
+])
+```
+
+#### Explanation:
+In addition to counting the students in each age group, this query also pushes the `name` field into each bucket, so we can see which students belong to each age range.
+
+#### Output:
+```json
+[
+  { "_id": 0, "count": 2, "name": [ "Emma Johnson", "Olivia Brown" ] },
+  { "_id": 30, "count": 1, "name": [ "Sophia Rodriguez" ] }
+]
+```
+
+### Key Points:
+- **`groupBy`**: Field by which documents are categorized.
+- **`boundaries`**: Specify the boundaries for bucket ranges.
+- **`default`**: Catches values outside the specified boundary ranges.
+- **`output`**: Define what fields to include in the result (e.g., counts, lists, etc.).
+
+The `$bucket` operator helps you categorize and analyze documents based on value ranges, making it a useful tool for data analysis and reporting.
+---
