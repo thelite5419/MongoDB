@@ -1765,4 +1765,68 @@ db.collectionName.find({$text: {$search: "experience -manage"}});
 db.collectionName.createIndex({name: "text"}, {background: true});
 ```
 - Creating a text index locks the collection, preventing other queries from running until the index is created. Using the `background: true` option avoids locking the collection but delays text-based queries until the index is fully built.
+
+---
+
+## Aggregation Pipeline:
+The aggregation pipeline in MongoDB works similarly to Unix pipelines, where the output of one operation is fed as input to the next operation. This allows for complex data transformation and analysis in a flexible manner.
+
+#### Syntax:
+```js
+db.collection.aggregate(pipeline, options)
+```
+
+### Example Queries:
+
+1. **Simple Match:**
+   To filter documents where `gender` is "Male":
+   ```js
+   db.emp.aggregate([{$match: {gender: "Male"}}])
+   ```
+   The `$match` stage filters documents based on specified conditions.
+
+2. **Group by Age:**
+   To group documents by the `age` field:
+   ```js
+   db.emp.aggregate([{$group: {_id:"$age"}}])
+   ```
+   This groups the documents by `age`, returning unique values of `age` with `_id` being the group identifier.
+
+3. **Push Data into Groups:**
+   To group by `age` and push the employee names into the groups:
+   ```js
+   db.emp.aggregate([{$group: {_id:"$age", name:{$push: "$name"}}}])
+   ```
+   This results in an array of names grouped by their age.
+
+4. **Push Full Documents into Groups:**
+   Using `$$ROOT` to push the entire document into the group:
+   ```js
+   db.emp.aggregate([{$group: {_id:"$age", name:{$push: "$$ROOT"}}}])
+   ```
+   Here, `$$ROOT` refers to the entire document being grouped, not just a single field.
+
+5. **Count Per Age Group for Male Employees:**
+   To count the number of male employees in each age group:
+   ```js
+   db.emp.aggregate([
+      {$match:{gender: "Male"}},
+      {$group:{_id:"$age", countOfEmpAgeGroup:{$sum:1}}}
+   ])
+   ```
+   `$sum: 1` adds 1 for each document in the group, providing the count.
+
+6. **Sorting by Count in Descending Order:**
+   To count male employees by age group and sort them by count:
+   ```js
+   db.emp.aggregate([
+      {$match:{gender: "Male"}},
+      {$group:{_id:"$age", countOfEmpAgeGroup:{$sum:1}}},
+      {$sort: {countOfEmpAgeGroup: -1}}
+   ])
+   ```
+
+### $filter:
+MongoDB also provides the `$filter` stage for more complex conditions inside pipelines. This stage allows you to apply custom filtering to arrays within documents.
+
 ---
