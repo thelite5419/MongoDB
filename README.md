@@ -2144,3 +2144,47 @@ When we insert a new document after reaching the cap (5 documents), MongoDB remo
 This functionality is especially useful for logging, real-time data tracking, and applications where only the most recent records are needed.
 
 ---
+
+## Replication & Sharding
+### Replication
+Replication in MongoDB involves creating multiple copies of data across different servers to increase data availability, enhance fault tolerance, and support disaster recovery. MongoDB uses **replica sets** to manage this process. A replica set contains multiple **nodes**:
+
+- **Primary Node**: The main server that handles all write operations.
+- **Secondary Nodes**: Servers that replicate the data from the primary node. They are available to handle read operations and serve as backups.
+
+If the primary node fails, MongoDB initiates an **election** to promote a secondary node to primary, ensuring **automatic failover** and maintaining database availability without downtime.
+
+#### Why Replication?
+1. **Data Safety**: Multiple copies safeguard against data loss.
+2. **24/7 Availability**: Redundant servers provide uninterrupted data access.
+3. **Disaster Recovery**: Backup nodes enable quick recovery after hardware or service failures.
+4. **Maintenance without Downtime**: Allows updates and maintenance activities like indexing and backup without interrupting the application.
+5. **Read Scaling**: Additional copies enable faster read operations by distributing queries.
+
+### How Replication Works in MongoDB
+1. The **primary node** accepts all write operations.
+2. **Secondary nodes** replicate the primary’s data to maintain an identical dataset.
+3. If the primary node fails, an **election** occurs among secondary nodes to select a new primary, ensuring continuous availability.
+4. When a failed primary node recovers, it rejoins as a secondary node.
+
+#### Example of Replica Set Architecture:
+A basic setup involves at least three nodes:
+- **Primary Node**: Receives all write requests and maintains current data.
+- **Two Secondary Nodes**: Replicate data from the primary for redundancy and disaster recovery.
+
+### Sharding
+**Sharding** is a method of distributing data across multiple servers to handle high traffic and large datasets. Instead of adding more hardware to a single server (vertical scaling), sharding **horizontally scales** by splitting data across multiple servers, or **shards**.
+
+#### How Sharding Works
+1. **Data Partitioning**: Sharding divides the data across multiple servers, each handling a portion of the overall dataset.
+2. **Increased Storage and Throughput**: Each new shard increases both storage capacity and query-handling capability.
+3. **Improved Performance**: By distributing data and query loads, sharding reduces the performance bottlenecks associated with single-server limits.
+
+#### Benefits of Sharding:
+- **Infinite Scalability**: In theory, data and traffic distribution can keep pace with demand as more shards are added.
+- **Cost Efficiency**: Horizontal scaling through sharding is often more cost-effective than continually upgrading a single server.
+- **Higher Throughput**: Queries and data updates are distributed across shards, enhancing performance and enabling the database to handle more simultaneous operations.
+
+Sharding is ideal for large-scale applications requiring high read/write throughput and large data storage that surpasses the capacity of a single server. Together, **replication** and **sharding** enable MongoDB to maintain high availability, resilience, and scalability for demanding, data-intensive applications.
+
+---
