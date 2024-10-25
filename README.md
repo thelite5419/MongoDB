@@ -2034,3 +2034,74 @@ db.customers.aggregate([
 
 This join will show each customer along with their respective orders in the `order_details` field. If a customer does not have any orders, the `order_details` array will be empty, reflecting the nature of a **left outer join**.
 ---
+## $project
+The `$project` stage in MongoDB aggregation allows you to reshape documents by including or excluding specific fields, creating computed fields, and renaming fields to customize the output of your aggregation query.
+
+### Syntax and Usage
+
+- **Include/Exclude Fields**: Specify `1` to include a field and `0` to exclude it.
+- **Computed Fields**: Use expressions to perform calculations or transformations on existing fields.
+- **Rename Fields**: Rename a field by assigning it a new name in the output.
+
+### Examples
+
+#### 1. Including Only the `name` Field:
+
+```javascript
+db.customers.aggregate([
+  { $project: { name: 1, _id: 0 } }
+]);
+```
+
+**Output**:
+
+```json
+[
+  { "name": "John Smith" },
+  { "name": "Emma Johnson" },
+  { "name": "Alex Patel" }
+]
+```
+
+Explanation: This includes only the `name` field and excludes the `_id` field.
+
+#### 2. Projecting Fields with Different Names:
+
+```javascript
+db.customers.aggregate([
+  { $project: { mail: "$email" } }
+]);
+```
+
+**Output**:
+
+```json
+[
+  { "_id": 1, "mail": "john.smith@example.com" },
+  { "_id": 2, "mail": "emma.johnson@example.com" },
+  { "_id": 3, "mail": "alex.patel@example.com" }
+]
+```
+
+Explanation: This renames the `email` field to `mail` in the output.
+
+#### 3. Using Arithmetic Expressions in Projection:
+
+```javascript
+db.customers.aggregate([
+  { $project: { _id: 0, name: 1, age: { $multiply: [2, "$age"] } } }
+]);
+```
+
+**Output**:
+
+```json
+[
+  { "name": "John Smith", "age": 60 },
+  { "name": "Emma Johnson", "age": 56 },
+  { "name": "Alex Patel", "age": 70 }
+]
+```
+
+Explanation: This doubles the `age` value for each document and includes only the `name` and computed `age` fields in the output.
+---
