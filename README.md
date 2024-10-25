@@ -2205,6 +2205,4 @@ MongoDB provides **ACID** properties to ensure reliable transactions. ACID is an
 
 4. **Durability**: Once a transaction has been committed, its effects are permanent and will survive even in the event of a system failure. This means that the changes made by a committed transaction will persist, ensuring data reliability.
 
-Understanding these concepts is essential for developers working with MongoDB, as they enable the implementation of robust and reliable data management practices.
-
 ---
