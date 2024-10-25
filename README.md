@@ -2104,4 +2104,43 @@ db.customers.aggregate([
 ```
 
 Explanation: This doubles the `age` value for each document and includes only the `name` and computed `age` fields in the output.
+
+---
+
+## Capped Collection
+In MongoDB, a **capped collection** is a special type of collection with a fixed size that works like a circular queue. Once the specified size limit is reached, the oldest documents are automatically removed as new documents are inserted, ensuring the collection does not exceed the defined size or maximum document count.
+
+### Example:
+```javascript
+db.createCollection("myCappedCollection", { capped: true, size: 5000, max: 5 })
+```
+Here, `size: 5000` limits the collection's size in bytes, and `max: 5` restricts it to 5 documents.
+
+### Insertion and Behavior:
+When we insert a new document after reaching the cap (5 documents), MongoDB removes the oldest document automatically:
+
+1. Initial state after inserting five documents:
+   ```json
+   [
+     { "_id": 1, "message": "Message 1" },
+     { "_id": 2, "message": "Message 2" },
+     { "_id": 3, "message": "Message 3" },
+     { "_id": 4, "message": "Message 4" },
+     { "_id": 5, "message": "Message 5" }
+   ]
+   ```
+
+2. After inserting a new document `{ "message": "Message 6" }`, the first document is removed:
+   ```json
+   [
+     { "_id": 2, "message": "Message 2" },
+     { "_id": 3, "message": "Message 3" },
+     { "_id": 4, "message": "Message 4" },
+     { "_id": 5, "message": "Message 5" },
+     { "_id": 6, "message": "Message 6" }
+   ]
+   ```
+
+This functionality is especially useful for logging, real-time data tracking, and applications where only the most recent records are needed.
+
 ---
