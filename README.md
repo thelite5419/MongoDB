@@ -2188,3 +2188,23 @@ A basic setup involves at least three nodes:
 Sharding is ideal for large-scale applications requiring high read/write throughput and large data storage that surpasses the capacity of a single server. Together, **replication** and **sharding** enable MongoDB to maintain high availability, resilience, and scalability for demanding, data-intensive applications.
 
 ---
+
+## Transactions in MongoDB
+
+A transaction in MongoDB is a set of operations that are executed as a single, atomic unit. This means that either all the operations within the transaction are committed to the database, or none of them are. This mechanism is crucial for maintaining data consistency within the database.
+
+### ACID Properties
+
+MongoDB provides **ACID** properties to ensure reliable transactions. ACID is an acronym that stands for:
+
+1. **Atomicity**: This property ensures that database operations are treated as a single, indivisible unit. If any part of the transaction fails, the entire transaction is rolled back, preventing partial updates that could lead to data inconsistencies.
+
+2. **Consistency**: This guarantees that the database remains in a valid state after a transaction completes. It ensures that the database remains consistent with its own rules and constraints, maintaining the integrity of the data.
+
+3. **Isolation**: This property ensures that concurrent transactions do not interfere with each other. Each transaction operates as if it were the only transaction executing, allowing it to see a consistent view of the database.
+
+4. **Durability**: Once a transaction has been committed, its effects are permanent and will survive even in the event of a system failure. This means that the changes made by a committed transaction will persist, ensuring data reliability.
+
+Understanding these concepts is essential for developers working with MongoDB, as they enable the implementation of robust and reliable data management practices.
+
+---
