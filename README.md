@@ -1917,7 +1917,7 @@ In addition to counting the students in each age group, this query also pushes t
 The `$bucket` operator helps you categorize and analyze documents based on value ranges, making it a useful tool for data analysis and reporting.
 
 ---
-# $lookup
+## $lookup
 The `$lookup` operator in MongoDB is used to perform a left outer join between two collections, similar to SQL joins. It allows you to bring together related data from different collections by specifying the fields from both collections that should match.
 
 ### Steps to Use `$lookup` in MongoDB:
