@@ -2033,7 +2033,9 @@ db.customers.aggregate([
 - **`as`**: The result of the join is stored as an array called `order_details`.
 
 This join will show each customer along with their respective orders in the `order_details` field. If a customer does not have any orders, the `order_details` array will be empty, reflecting the nature of a **left outer join**.
+
 ---
+
 ## $project
 The `$project` stage in MongoDB aggregation allows you to reshape documents by including or excluding specific fields, creating computed fields, and renaming fields to customize the output of your aggregation query.
 
