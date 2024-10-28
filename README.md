@@ -2206,3 +2206,129 @@ MongoDB provides **ACID** properties to ensure reliable transactions. ACID is an
 4. **Durability**: Once a transaction has been committed, its effects are permanent and will survive even in the event of a system failure. This means that the changes made by a committed transaction will persist, ensuring data reliability.
 
 ---
+
+## Date Queries in MongoDB
+
+Handling dates in MongoDB is typically done using the `ISODate` method, which ensures consistency with the UTC (Universal Time Coordinated) standard.
+
+### Inserting Dates
+
+Dates are inserted using the `ISODate` format, which follows the `year-month-day` pattern.
+
+```javascript
+// Inserting a date record
+db.dates.insertOne({_id: 1, name: "gauri", DOB: ISODate("2003-09-04")})
+// Syntax for ISODate insertion
+ISODate("year-month-day")
+```
+
+MongoDB saves dates in UTC by default. When queried, the output is also displayed in UTC format.
+
+### Example:
+```javascript
+// Query to retrieve all records
+db.dates.find().pretty();
+```
+
+**Output:**
+```javascript
+[
+  { _id: 1, name: 'gauri', DOB: ISODate('2003-09-04T00:00:00.000Z') },
+  { _id: 2, name: 'prathamesh', DOB: ISODate('2004-01-05T00:00:00.000Z') }
+]
+```
+
+### Inserting Dates with Time
+
+To insert dates with specific times, you can include the time and time zone offset within the `ISODate` method:
+
+```javascript
+// Inserting date with time and time zone offset
+db.dates.insertOne({_id: 3, name: 'nikhil', DOB: ISODate('2003-01-28T02:00:10.000+02:00')})
+```
+
+After inserting, querying all records again:
+
+```javascript
+db.dates.find().pretty();
+```
+
+**Output:**
+```javascript
+[
+  { _id: 1, name: 'gauri', DOB: ISODate('2003-09-04T00:00:00.000Z') },
+  { _id: 2, name: 'prathamesh', DOB: ISODate('2004-01-05T00:00:00.000Z') },
+  { _id: 3, name: 'nikhil', DOB: ISODate('2003-01-28T00:00:10.000Z') }
+]
+```
+
+### Filtering Dates
+
+To filter records by date, MongoDB provides comparison operators like `$gte` (greater than or equal to):
+
+```javascript
+// Querying dates from 2004-01-01 onwards
+db.dates.find({DOB: {$gte: ISODate("2004-01-01")}})
+```
+
+**Output:**
+```javascript
+[
+  { _id: 2, name: 'prathamesh', DOB: ISODate('2004-01-05T00:00:00.000Z') }
+]
+```
+
+### Using Dates with Aggregations
+
+MongoDB’s aggregation framework enables advanced operations like grouping data by year.
+
+```javascript
+// Grouping records by the year of DOB
+db.dates.aggregate([
+  { $group: { _id: { $year: "$DOB" }, names: { $push: "$name" } } }
+])
+```
+
+**Output:**
+```javascript
+[
+  { _id: 2004, names: ['prathamesh'] },
+  { _id: 2003, names: ['gauri', 'nikhil'] }
+]
+```
+
+In this example, names are grouped according to their year of birth.
+
+### Formatting Dates in Day-Month-Year
+
+To display dates in a custom format (e.g., day-month-year), MongoDB provides the `$dateToString` operator:
+
+```javascript
+db.dates.aggregate([
+  {
+    $project: {
+      name: 1,
+      DOB: {
+        $dateToString: {
+          format: "%d-%m-%Y",
+          date: "$DOB"
+        }
+      }
+    }
+  }
+])
+```
+
+**Output:**
+```javascript
+[
+  { _id: 1, name: 'gauri', DOB: '04-09-2003' },
+  { _id: 2, name: 'prathamesh', DOB: '05-01-2004' },
+  { _id: 3, name: 'nikhil', DOB: '28-01-2003' }
+]
+```
+
+This converts the `DOB` field to a more human-readable format of day-month-year.
+
+---
+
